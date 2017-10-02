@@ -54,7 +54,15 @@ Example
                 <th scope="row">{{ _('Query (via SQL)') }}</th>
                 <td><code>{{ h.url_for(controller='api', action='action', ver=3, logic_function='datastore_search_sql', qualified=True) }}</code></td>
               </tr>
-
+              {% if h.ckanext_odata_res_format(resource_id) %}
+                <tr>
+                  <th scope="row">{{ _('Download as ...') }}</th>
+                  <td>
+                    <a href="/export/{{resource_id[0:3]}}/{{resource_id[3:6]}}/{{resource_id}}.json" target="_blank">JSON</a>,
+                    <a href="/export/{{resource_id[0:3]}}/{{resource_id[3:6]}}/{{resource_id}}.tsv" target="_blank">TSV</a>
+                 </td>
+                </tr>
+              {% endif %}
             </tbody>
           </table>
           <p></p>
