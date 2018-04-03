@@ -111,6 +111,19 @@ def odata(context, data_dict):
         limit = get_qs_int('$top', 500)
         offset = get_qs_int('$skip', 0)
 
+        # Ignore request if given limit is too high
+        if limit > 500:
+            out = OrderedDict()
+            out['error'] = {
+                'code': '400',
+                'message': {
+                    'lang': 'en-us',
+                    'value': 'The given $top parameter exceeds the maximum value of 500.'
+                }
+            }
+            response = json.dumps(out)
+            return response
+
         data_dict = {
             'resource_id': resource_id,
             'filters': filters,
