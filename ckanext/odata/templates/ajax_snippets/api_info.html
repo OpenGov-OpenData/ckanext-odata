@@ -52,7 +52,19 @@ Example
               </tr>
               <tr>
                 <th scope="row">{{ _('Query (via SQL)') }}</th>
-                <td><code>{{ h.url_for(controller='api', action='action', ver=3, logic_function='datastore_search_sql', qualified=True) }}</code></td>
+                <td>
+                  <code>{{ h.url_for(controller='api', action='action', ver=3, logic_function='datastore_search_sql', qualified=True) }}</code>
+                  <br/>
+                  <i>
+                    <code>
+                      * Requires <strong>API Key</strong> to use SQL Queries follow the <a href="http://docs.ckan.org/en/{{g.ckan_doc_version}}/api/#authentication-and-api-keys" alt="API documentation" target="_blank">documentation</a> below:
+                    </code>
+                  </i>
+                  <br/>
+                  <code>
+                    <a href="http://docs.ckan.org/en/{{g.ckan_doc_version}}/api/#authentication-and-api-keys" alt="API documentation" target="_blank">http://docs.ckan.org/en/{{g.ckan_doc_version}}/api/#authentication-and-api-keys</a>
+                  </code>
+                </td>
               </tr>
 
             </tbody>
@@ -90,6 +102,16 @@ Example
           <strong>{{ _('Query example (via SQL statement)') }}</strong>
           <p>
           <code><a href="{{sql_example_url}}" target="_blank">{{sql_example_url}}</a></code>
+          <br/>
+          <i>
+            <code>
+              * Requires <strong>API Key</strong> to use SQL Queries follow the <a href="http://docs.ckan.org/en/{{g.ckan_doc_version}}/api/#authentication-and-api-keys" alt="API documentation" target="_blank">documentation</a> below:
+            </code>
+          </i>
+          <br/>
+          <code>
+            <a href="http://docs.ckan.org/en/{{g.ckan_doc_version}}/api/#authentication-and-api-keys" alt="API documentation" target="_blank">http://docs.ckan.org/en/{{g.ckan_doc_version}}/api/#authentication-and-api-keys</a>
+          </code>
           </p>
 
           <strong>{{ _('OData example (first 5 results, skip 1)') }}</strong>
