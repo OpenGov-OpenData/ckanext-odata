@@ -98,7 +98,7 @@ def odata(context, data_dict):
         action = t.get_action('datastore_search_sql')
 
         query = t.request.GET.get('$sqlfilter')
-        sql = "SELECT * FROM \"%s\" %s"%(resource_id,query)
+        sql = "SELECT * FROM \"%s\" %s"%(resource_id, query)
         
         data_dict = {
             'sql': sql
@@ -116,14 +116,14 @@ def odata(context, data_dict):
             'offset': offset
         }
         
-
     try:
         result = action({}, data_dict)
     except t.ObjectNotFound:
         t.abort(404, t._('DataStore resource not found'))
     except t.NotAuthorized:
         t.abort(401, t._('DataStore resource not authourized'))
-    
+    except t.ValidationError as e:
+        return json.dumps(e.error_dict)
     
     if not t.request.GET.get('$sqlfilter'):
         num_results = result['total']
