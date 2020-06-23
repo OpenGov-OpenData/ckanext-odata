@@ -96,10 +96,8 @@ def odata(context, data_dict):
     # as they should be specified by the sql query
     if t.request.GET.get('$sqlfilter'):
         action = t.get_action('datastore_search_sql')
-        
-        # Replace double quotes with single quotes to avoid syntax errors.
-        # Not sure if this will cause us any trouble later.
-        query = t.request.GET.get('$sqlfilter').replace('"','\'')
+
+        query = t.request.GET.get('$sqlfilter')
         sql = "SELECT * FROM \"%s\" %s"%(resource_id,query)
         
         data_dict = {
