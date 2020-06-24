@@ -11,7 +11,7 @@ Example
 #}
 
 {% set resource_id = h.sanitize_id(resource_id) %}
-{% set sql_example_url = h.url_for(controller='api', action='action', ver=3, logic_function='datastore_search_sql', qualified=True) + '?sql=SELECT * from "' + resource_id + '" WHERE title LIKE \'jones\'' %}
+{% set sql_example_url = h.url_for(controller='api', action='action', ver=3, logic_function='datastore_search_sql', qualified=True) + '?sql=SELECT * from "' + resource_id + '" WHERE \"title\" LIKE \'jones\'' %}
 {# not urlencoding the sql because its clearer #}
 <div{% if not embedded %} class="modal"{% endif %}>
   <div class="modal-header">

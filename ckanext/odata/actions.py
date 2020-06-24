@@ -96,11 +96,9 @@ def odata(context, data_dict):
     # as they should be specified by the sql query
     if t.request.GET.get('$sqlfilter'):
         action = t.get_action('datastore_search_sql')
-        
-        # Replace double quotes with single quotes to avoid syntax errors.
-        # Not sure if this will cause us any trouble later.
-        query = t.request.GET.get('$sqlfilter').replace('"','\'')
-        sql = "SELECT * FROM \"%s\" %s"%(resource_id,query)
+
+        query = t.request.GET.get('$sqlfilter')
+        sql = "SELECT * FROM \"%s\" %s"%(resource_id, query)
         
         data_dict = {
             'sql': sql
@@ -118,14 +116,14 @@ def odata(context, data_dict):
             'offset': offset
         }
         
-
     try:
         result = action({}, data_dict)
     except t.ObjectNotFound:
         t.abort(404, t._('DataStore resource not found'))
     except t.NotAuthorized:
         t.abort(401, t._('DataStore resource not authourized'))
-    
+    except t.ValidationError as e:
+        return json.dumps(e.error_dict)
     
     if not t.request.GET.get('$sqlfilter'):
         num_results = result['total']
