@@ -1,15 +1,10 @@
-import ckan.plugins as p
+from ckan.plugins.toolkit import BaseController
+from ckanext.odata import utils
 
-
-class ODataController(p.toolkit.BaseController):
+class ODataController(BaseController):
 
     def odata(self, uri):
-        data_dict = {'uri': uri}
-        action = p.toolkit.get_action('ckanext-odata_odata')
-        result = action({}, data_dict)
-        return result
+        return utils.odata(uri)
 
     def odata_metadata(self):
-        action = p.toolkit.get_action('ckanext-odata_metadata')
-        result = action({},{})
-        return result
+        return utils.odata_metadata()

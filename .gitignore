@@ -3,3 +3,5 @@ syntax: glob
 *.pyc
 *.sw*
 *.egg-info
+
+.DS_Store
