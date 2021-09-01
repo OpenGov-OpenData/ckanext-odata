@@ -5,10 +5,10 @@ from ckanext.odata import utils
 odata_blueprint = Blueprint(u'odata_blueprint', __name__)
 
 
-def odata(self, uri):
+def odata(uri):
     return utils.odata(uri)
 
-def odata_metadata(self):
+def odata_metadata():
     return utils.odata_metadata()
 
 

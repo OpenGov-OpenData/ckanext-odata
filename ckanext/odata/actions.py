@@ -1,8 +1,9 @@
 import re
 import simplejson as json
+import ckan.plugins.toolkit as t
 
-import ckan.plugins as p
-
+from flask import make_response
+from ckan.exceptions import CkanVersionException
 
 try:
     from collections import OrderedDict  # from python 2.7
@@ -21,9 +22,18 @@ TYPE_TRANSLATIONS = {
     'text': 'Edm.String',
 }
 
+name_pattern = r'[^:A-Z_a-z.0-9\u00B7\u00C0-\u00D6\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u0300-\u036F\u203F-\u2040]'
 
-t = p.toolkit
 _base_url = None
+
+
+def get_request_param():
+    try:
+        requires_ckan_version("2.9")
+    except:
+        return t.request.params
+    else:
+        return t.request.args
 
 
 def name_2_xml_tag(name):
@@ -42,10 +52,7 @@ def name_2_xml_tag(name):
     '''
 
     # leave well-formed XML element characters only
-    name = re.sub(r'[^A-Z_a-z\u00C0-\u00D6\u0370-\u037D\u037F-\u1FFF'
-                  r'\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF'
-                  r'\uF900-\uFDCF\uFDF0-\uFFFD-0-9\u00B7\u0300-\u036F'
-                  r'\u203F-\u2040]', '', name)
+    name = re.sub(name_pattern, '', name)
 
     # add '_' in front of non-NameStart characters
     name = re.sub(re.compile(r'(?P<q>^[-.0-9\u00B7#\u0300-\u036F\u203F-\u2040])', re.MULTILINE),
@@ -59,8 +66,9 @@ def name_2_xml_tag(name):
 
 
 def get_qs_int(param, default):
-    ''' Get a query sting param as an int '''
-    value = t.request.GET.get(param, default)
+    ''' Get a query string param as an int '''
+    request_params = get_request_param()
+    value = request_params.get(param, default)
     try:
         value = int(value)
     except ValueError:
@@ -90,15 +98,16 @@ def odata(context, data_dict):
         resource_id = uri
         filters = {}
     
-    output_json = t.request.GET.get('$format') == 'json'
+    request_params = get_request_param()
+    output_json = request_params.get('$format') == 'json'
     
     # Ignore $limit & $top paramters if $sqlfilter is specified
     # as they should be specified by the sql query
-    if t.request.GET.get('$sqlfilter'):
+    if request_params.get('$sqlfilter'):
         action = t.get_action('datastore_search_sql')
 
-        query = t.request.GET.get('$sqlfilter')
-        sql = "SELECT * FROM \"%s\" %s"%(resource_id, query)
+        query = request_params.get('$sqlfilter', '')
+        sql = "SELECT * FROM \"{}\" {}".format(resource_id, query)
         
         data_dict = {
             'sql': sql
@@ -125,7 +134,7 @@ def odata(context, data_dict):
     except t.ValidationError as e:
         return json.dumps(e.error_dict)
     
-    if not t.request.GET.get('$sqlfilter'):
+    if not request_params.get('$sqlfilter'):
         num_results = result['total']
         if num_results > offset + limit:
             next_query_string = '$skip=%s&$top=%s' % (offset + limit, limit)
@@ -162,8 +171,15 @@ def odata(context, data_dict):
             'entries': result['records'],
             'next_query_string': next_query_string,
         }
-        t.response.headers['Content-Type'] = 'application/atom+xml;type=feed;charset=utf-8'
-        return t.render('ckanext-odata/collection.xml', data)
+        try:
+            t.requires_ckan_version("2.9")
+        except CkanVersionException:
+            t.response.headers['Content-Type'] = 'application/atom+xml;type=feed;charset=utf-8'
+            return t.render('ckanext-odata/collection.xml', data)
+        else:
+            response = make_response(t.render('ckanext-odata/collection.xml', data))
+            response.headers['Content-Type'] = 'application/atom+xml;type=feed;charset=utf-8'
+            return response
 
 
 def odata_metadata(context, data_dict):
@@ -211,5 +227,12 @@ def odata_metadata(context, data_dict):
 
     data = { 'collections' : collections }
 
-    t.response.headers['Content-Type'] = 'application/xml;charset=utf-8'
-    return t.render('ckanext-odata/metadata.xml', data)
+    try:
+        t.requires_ckan_version("2.9")
+    except CkanVersionException:
+        t.response.headers['Content-Type'] = 'application/xml;charset=utf-8'
+        return t.render('ckanext-odata/metadata.xml', data)
+    else:
+        response = make_response(t.render('ckanext-odata/metadata.xml', data))
+        response.headers['Content-Type'] = 'application/xml;charset=utf-8'
+        return response
