@@ -183,45 +183,44 @@ def odata(context, data_dict):
 
 
 def odata_metadata(context, data_dict):
-    table_metadata_dict = {
-        'resource_id': '_table_metadata',
-        'limit': '10000',
-    }
-
     try:
-        result = t.get_action('datastore_search')({}, table_metadata_dict)
+        table_metadata_dict = {
+            'resource_id': '_table_metadata',
+            'limit': '1000',
+            'sort': 'oid desc'
+        }
+        table_metadata = t.get_action('datastore_search')({}, table_metadata_dict)
+        records = table_metadata.get('records', [])
     except t.ObjectNotFound:
         t.abort(404, t._('Table Metadata not found'))
     except t.NotAuthorized:
         t.abort(401, t._('Table Metadata not authourized'))
 
-    datastore_list = []
-    for record in result.get('records'):
-        if record.get('name') != '_table_metadata' and len(record.get('name')) == 36:
-           datastore_list.append(record.get('name'))
 
     collections = []
-    for resource_id in datastore_list:
-        data_dict = {
-            'resource_id': resource_id,
-            'limit': '0',
-        }
+    for record in records:
+        if record.get('name') == '_table_metadata' or len(record.get('name')) != 36:
+            continue
 
         try:
-            result_2 = t.get_action('datastore_search')({}, data_dict)
+            field_lookup_dict = {
+                'resource_id': record.get('name'),
+                'limit': '0',
+            }
+            field_lookup = t.get_action('datastore_search')({}, field_lookup_dict)
+            fields = field_lookup.get('fields', [])
         except:
             continue
 
-        fields = []
-        for field in result_2['fields']:
-            fields.append({
-                'name': name_2_xml_tag(field['id']),
-                # if we have no translation for a type use Edm.String
-                'type': TYPE_TRANSLATIONS.get(field['type'], 'Edm.String'),
-            })
         collection = {
-            'name': resource_id,
-            'fields': fields
+            'name': record.get('name'),
+            'fields': [
+                {
+                    'name': name_2_xml_tag(field['id']),
+                    'type': TYPE_TRANSLATIONS.get(field['type'], 'Edm.String')
+                }
+                for field in fields
+            ]
         }
         collections.append(collection)
 
