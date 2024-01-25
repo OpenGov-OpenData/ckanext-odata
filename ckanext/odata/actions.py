@@ -2,6 +2,7 @@ import re
 import simplejson as json
 import ckan.plugins.toolkit as t
 
+from concurrent.futures import ProcessPoolExecutor
 from flask import make_response
 from ckan.exceptions import CkanVersionException
 
@@ -182,6 +183,30 @@ def odata(context, data_dict):
             return response
 
 
+def get_collection(resource_id):
+    try:
+        field_lookup_dict = {
+            'resource_id': resource_id,
+            'limit': '0',
+        }
+        field_lookup = t.get_action('datastore_search')({}, field_lookup_dict)
+        fields = field_lookup.get('fields', [])
+    except:
+        return
+
+    collection = {
+        'name': resource_id,
+        'fields': [
+            {
+                'name': name_2_xml_tag(field['id']),
+                'type': TYPE_TRANSLATIONS.get(field['type'], 'Edm.String')
+            }
+            for field in fields
+        ]
+    }
+    return collection
+
+
 def odata_metadata(context, data_dict):
     try:
         table_metadata_dict = {
@@ -196,33 +221,16 @@ def odata_metadata(context, data_dict):
     except t.NotAuthorized:
         t.abort(401, t._('Table Metadata not authourized'))
 
-
     collections = []
-    for record in records:
-        if record.get('name') == '_table_metadata' or len(record.get('name')) != 36:
-            continue
+    with ProcessPoolExecutor(8) as executor:
+        # Submit tasks to the process pool
+        futures = [executor.submit(get_collection, record.get('name')) for record in records]
 
-        try:
-            field_lookup_dict = {
-                'resource_id': record.get('name'),
-                'limit': '0',
-            }
-            field_lookup = t.get_action('datastore_search')({}, field_lookup_dict)
-            fields = field_lookup.get('fields', [])
-        except:
-            continue
-
-        collection = {
-            'name': record.get('name'),
-            'fields': [
-                {
-                    'name': name_2_xml_tag(field['id']),
-                    'type': TYPE_TRANSLATIONS.get(field['type'], 'Edm.String')
-                }
-                for field in fields
-            ]
-        }
-        collections.append(collection)
+        # Collect results as they become available
+        for future in futures:
+            result = future.result()
+            if result:
+                collections.append(result)
 
     data = { 'collections' : collections }
 
