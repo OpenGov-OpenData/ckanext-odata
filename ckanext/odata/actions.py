@@ -186,7 +186,7 @@ def odata_metadata(context, data_dict):
     try:
         table_metadata_dict = {
             'resource_id': '_table_metadata',
-            'limit': '1000',
+            'limit': '500',
             'sort': 'oid desc'
         }
         table_metadata = t.get_action('datastore_search')({}, table_metadata_dict)
@@ -195,7 +195,6 @@ def odata_metadata(context, data_dict):
         t.abort(404, t._('Table Metadata not found'))
     except t.NotAuthorized:
         t.abort(401, t._('Table Metadata not authourized'))
-
 
     collections = []
     for record in records:
