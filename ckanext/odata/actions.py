@@ -186,8 +186,7 @@ def odata_metadata(context, data_dict):
     try:
         table_metadata_dict = {
             'resource_id': '_table_metadata',
-            'limit': '500',
-            'sort': 'oid desc'
+            'limit': '500'
         }
         table_metadata = t.get_action('datastore_search')({}, table_metadata_dict)
         records = table_metadata.get('records', [])
