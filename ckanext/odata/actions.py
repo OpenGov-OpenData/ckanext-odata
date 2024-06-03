@@ -51,6 +51,9 @@ def name_2_xml_tag(name):
         [#x203F-#x2040]
     '''
 
+    # replace '%' with 'Percent' to avoid duplicate identifier with different data types
+    name = name.replace('%', 'Percent')
+
     # leave well-formed XML element characters only
     name = re.sub(name_pattern, '', name)
 
