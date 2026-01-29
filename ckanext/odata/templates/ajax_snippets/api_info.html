@@ -11,9 +11,9 @@ Example
 #}
 
 {% set resource_id = h.sanitize_id(resource_id) %}
-{% set sql_example_url = h.url_for(controller='api', action='action', ver=3, logic_function='datastore_search_sql', qualified=True) + '?sql=SELECT * from "' + resource_id + '" WHERE \"title\" LIKE \'jones\'' %}
+{% set sql_example_url = h.url_for('api.action', ver=3, logic_function='datastore_search_sql', qualified=True) + '?sql=SELECT * from "' + resource_id + '" WHERE \"title\" LIKE \'jones\'' %}
 {# not urlencoding the sql because its clearer #}
-<div{% if not embedded %} id="api-info-embed" class="modal fade"{% endif %}>
+<div {% if not embedded %} id="api-info-embed" class="modal fade"{% endif %} tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -21,21 +21,20 @@ Example
           {{ _('CKAN Data API') }}
         </h3>
       </div>
-      <div{% if not embedded %} class="modal-body"{% endif %}>
+      <div {% if not embedded %} class="modal-body"{% endif %}>
         <p><strong>{{ _('Access resource data via a web API with powerful query support') }}</strong>.
         {% trans %}
         Further information in the <a
-          href="http://docs.ckan.org/en/latest/maintaining/datastore.html" target="_blank">main
+          href="https://docs.ckan.org/en/latest/maintaining/datastore.html#api-reference" target="_blank">main
           CKAN Data API and DataStore documentation</a>.</p>
         {% endtrans %}
         <div class="panel-group accordion" id="accordion2">
         <div class="panel panel-default accordion-group">
           <div class="panel-heading accordion-heading">
-
-            <a class="accordion-toggle" data-toggle="collapse" data-parent="accordion2" href="#collapse-endpoints">{{ _('Endpoints') }} &raquo;</a>
+            <button class="accordion-toggle" type="button" data-toggle="collapse" data-parent="accordion2" href="#collapse-endpoints" aria-controls="collapse-endpoints">{{ _('Endpoints') }} &raquo;</a>
           </div>
           <div id="collapse-endpoints" class="in panel-collapse collapse accordion-body">
-            <div class="accordion-inner">
+            <div class="panel-body accordion-inner">
               <p>{{ _('The Data API can be accessed via the following actions of the CKAN action API.') }}</p>
               <table class="table-condensed table-striped table-bordered">
                 <thead></thead>
@@ -64,7 +63,7 @@ Example
                 <thead></thead>
                 <tbody>
                   <tr>
-                    <th scope="row"><a href="http://www.odata.org" target="_blank"><img src="http://www.odata.org/assets/ODataLogo-24.png"></a>OData</th>
+                    <th scope="row"><a href="http://www.odata.org" target="_blank"><img src="http://www.odata.org/assets/ODataLogo-24.png" alt="OData Logo">OData</a></th>
                     <td><code><a href="{{ h.ckanext_odata_link(resource_id) }}" target="_blank">{{ h.ckanext_odata_link(resource_id) }}</a></code></td>
                   </tr>
                 </tbody>
@@ -75,7 +74,7 @@ Example
 
         <div class="panel panel-default accordion-group">
           <div class="panel-heading accordion-heading">
-            <a class="accordion-toggle" data-toggle="collapse" data-parent="accordion2" href="#collapse-querying">{{ _('Querying') }} &raquo;</a>
+            <button class="accordion-toggle" type="button" data-toggle="collapse" data-parent="accordion2" href="#collapse-querying" aria-controls="collapse-querying">{{ _('Querying') }} &raquo;</a>
           </div>
           <div id="collapse-querying" class="panel-collapse accordion-body in collapse">
             <div class="panel-body accordion-inner">
@@ -110,13 +109,13 @@ Example
 
         <div class="panel panel-default accordion-group">
           <div class="panel-heading accordion-heading">
-           <a class="accordion-toggle" data-toggle="collapse" data-parent="accordion2" href="#collapse-javascript">{{ _('Example: Javascript') }} &raquo;</a>
+            <button class="accordion-toggle" type="button" data-toggle="collapse" data-parent="accordion2" href="#collapse-javascript" aria-controls="collapse-javascript">{{ _('Example: Javascript') }} &raquo;</a>
           </div>
           <div id="collapse-javascript" class="panel-collapse accordion-body collapse">
             <div class="panel-body accordion-inner">
               <p>{{ _('A simple ajax (JSONP) request to the data API using jQuery.') }}</p>
-              <pre>
-var data = {
+              <pre class="example-javascript"><code class="language-javascript"
+>var data = {
   resource_id: '{{resource_id}}', // the resource id
   limit: 5, // get 5 results
   q: 'jones' // query for 'jones'
@@ -128,26 +127,24 @@ $.ajax({
   success: function(data) {
     alert('Total results found: ' + data.result.total)
   }
-});
-              </pre>
+});</code></pre>
             </div>
           </div>
         </div>
 
         <div class="panel panel-default accordion-group">
           <div class="panel-heading accordion-heading">
-            <a class="accordion-toggle" data-toggle="collapse" data-parent="accordion2" href="#collapse-python">{{ _('Example: Python') }} &raquo;</a>
+            <button class="accordion-toggle" type="button" data-toggle="collapse" data-parent="accordion2" href="#collapse-python" aria-controls="collapse-python">{{ _('Example: Python') }} &raquo;</a>
           </div>
           <div id="collapse-python" class="panel-collapse accordion-body collapse">
             <div class="panel-body accordion-inner">
-              <pre>
-import json
+              <pre class="example-python"><code class="language-python"
+>import json
 import urllib.request
 url = '{{ h.url_for(qualified=True, controller='api', action='action', ver=3, logic_function='datastore_search', resource_id=resource_id, limit=5) + '&q=title:jones' }}'  {# not urlencoding the ":" because its clearer #}
 fileobj = urllib.request.urlopen(url)
 response_dict = json.loads(fileobj.read())
-print(response_dict)
-              </pre>
+print(response_dict)</code><pre>
             </div>
           </div>
         </div>
